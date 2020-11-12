@@ -96,13 +96,6 @@ def get_relations(sent):
     return (span.text)
 
 
-
-
-
-
-
-
-
 print("Total number of articles: {}\n".format(dataset.shape[0]))
 
 sentence_list = []
@@ -125,3 +118,39 @@ print("\nExtracting relations from sentences...")
 for s in tqdm(sentence_list):
     relations.append(get_relations(s))
 
+
+# Extract subject
+source = [i[0] for i in entity_pairs]
+
+# Extract object
+target = [i[1] for i in entity_pairs]
+
+kg_df = pd.DataFrame({"source": source, "target": target, "edge": relations})
+
+
+# Directed-graph from dataframe
+G = nx.from_pandas_edgelist(kg_df, "source", "target",
+                            edge_attr=True, create_using=nx.MultiDiGraph())
+
+print("Directed Graph generated.\n")
+
+print("Generating graph image...")
+plt.figure(figsize=(12, 12))
+
+pos = nx.spring_layout(G)
+nx.draw(G, with_labels=True, node_color="skyblue",
+        edge_cmap=plt.cm.Blues, pos=pos)
+plt.savefig("knowledge_graph_full.png")
+# plt.show()
+
+
+# Directed-graph for single realtion
+# For testing
+G_single = nx.from_pandas_edgelist(kg_df[kg_df["edge"] == "said"], "source", "target",
+                                   edge_attr=True, create_using=nx.MultiDiGraph())
+plt.figure(figsize=(12, 12))
+pos = nx.spring_layout(G_single, k=0.5)
+nx.draw(G_single, with_labels=True, node_color="skyblue",
+        node_size=1500, edge_cmap=plt.cm.Blues, pos=pos)
+plt.savefig("kg_single.png")
+# plt.show()
