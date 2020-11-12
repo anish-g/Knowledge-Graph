@@ -1,3 +1,4 @@
+from typing import Match
 import pandas as pd
 
 import spacy
@@ -17,15 +18,18 @@ dataset = pd.read_csv("scraped_articles.csv",
 
 print("Dataset loaded.")
 
+
 def clean_text(text):
     text = " ".join(text.split())
     text = text.replace("“", "")
     text = text.replace("”", "")
     return text
 
+
 def get_sentences(text):
     document = nlp(text)
     return [sent.string.strip() for sent in document.sents]
+
 
 def get_entities(sent):
     ent1 = ""
@@ -46,14 +50,14 @@ def get_entities(sent):
                 # If prev word was also 'compound', add current word to it
                 if prev_tok_dep == "compound":
                     prefix = prev_tok_text + " " + tok.text
-            
+
             # Check if token is modifier
             if tok.dep_.endswith("mod") == True:
                 modifier = tok.text
                 # If prev word was also 'compound', add current word to it
                 if prev_tok_dep == "compound":
                     modifier = prev_tok_text + " " + tok.text
-            
+
             if tok.dep_.find("subj") == True:
                 ent1 = modifier + " " + prefix + " " + tok.text
                 prefix = ""
@@ -71,6 +75,34 @@ def get_entities(sent):
     return [ent1.strip(), ent2.strip()]
 
 
+def get_relations(sent):
+    doc = nlp(sent)
+
+    # Matcher class object
+    matcher = Matcher(nlp.vocab)
+
+    # Pattern define
+    pattern = [{"DEP": "ROOT"},
+               {"DEP": "prep", "OP": "?"},
+               {"DEP": "agent", "OP": "?"},
+               {"POS": "ADJ", "OP": "?"}]
+
+    matcher.add("matching_1", None, pattern)
+    matches = matcher(doc)
+    k = len(matches) - 1
+
+    span = doc[matches[k][1]:matches[k][2]]
+
+    return (span.text)
+
+
+
+
+
+
+
+
+
 print("Total number of articles: {}\n".format(dataset.shape[0]))
 
 sentence_list = []
@@ -84,21 +116,12 @@ print("Total number of sentences: {}\n".format(len(sentence_list)))
 
 entity_pairs = []
 
-print("Extracting subject and object entity pairs...")
+print("Extracting subject-object entity pairs from sentences...")
 for s in tqdm(sentence_list):
     entity_pairs.append(get_entities(s))
 
+relations = []
+print("\nExtracting relations from sentences...")
+for s in tqdm(sentence_list):
+    relations.append(get_relations(s))
 
-
-# # total_sentences = 0
-# sentences = get_sentences(clean_text(text))
-# # for s in sentences:
-# #     total_sentences += 1
-# #     print(s)
-# #     print("     ---     ")
-
-# # print("total sentences ", total_sentences)
-# print(sentences[1])
-# doc = nlp(sentences[1])
-# for tok in doc:
-#     print(tok.text, "...", tok.dep_)
