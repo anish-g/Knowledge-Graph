@@ -132,25 +132,31 @@ kg_df = pd.DataFrame({"source": source, "target": target, "edge": relations})
 G = nx.from_pandas_edgelist(kg_df, "source", "target",
                             edge_attr=True, create_using=nx.MultiDiGraph())
 
-print("Directed Graph generated.\n")
+print("\nDirected Graph generated.")
 
-print("Generating graph image...")
+nx.write_graphml(G, "knowledge_graph.graphml")
+print("Directed graph saved as GraphML file.\n")
+
+print("Generating graph images...")
 plt.figure(figsize=(12, 12))
 
 pos = nx.spring_layout(G)
 nx.draw(G, with_labels=True, node_color="skyblue",
         edge_cmap=plt.cm.Blues, pos=pos)
-plt.savefig("knowledge_graph_full.png")
+plt.savefig("knowledge_graph.png")
 # plt.show()
 
 
-# Directed-graph for single realtion
+# Directed-graph for single relation
 # For testing
-G_single = nx.from_pandas_edgelist(kg_df[kg_df["edge"] == "said"], "source", "target",
+G_single_relation = nx.from_pandas_edgelist(kg_df[kg_df["edge"] == "said"], "source", "target",
                                    edge_attr=True, create_using=nx.MultiDiGraph())
 plt.figure(figsize=(12, 12))
-pos = nx.spring_layout(G_single, k=0.5)
-nx.draw(G_single, with_labels=True, node_color="skyblue",
+pos = nx.spring_layout(G_single_relation, k=0.5)
+nx.draw(G_single_relation, with_labels=True, node_color="skyblue",
         node_size=1500, edge_cmap=plt.cm.Blues, pos=pos)
-plt.savefig("kg_single.png")
+plt.savefig("kg_single_relation.png")
 # plt.show()
+
+
+print("\nCompleted!")
