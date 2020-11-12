@@ -35,8 +35,15 @@ print("Scraped individual article links...")
 filename = "scraped_articles.csv"
 f = open(filename, "w")
 
-headers = "title, post_detail\n"
+headers = "title, post\n"
 f.write(headers)
+
+
+def clean_text(text):
+    text = text.replace("\n", "")
+    text = text.replace("\t", "")
+    text = text.replace("Follow The Himalayan Times onTwitterandFacebook", "")
+    return text
 
 
 for link in article_links:
@@ -48,7 +55,7 @@ for link in article_links:
     postDetails = ""
     post = article_soup.select("div.mainPost p")
     for p in post:
-        postDetails += p.getText().replace("\n", "") + " "
+        postDetails += clean_text(p.getText()) + " "
 
     f.write(article_title.replace(",", "") + "," +
             postDetails.replace(",", "") + "\n")
