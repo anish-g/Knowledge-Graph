@@ -48,7 +48,7 @@ for link in article_links:
     postDetails = ""
     post = article_soup.select("div.mainPost p")
     for p in post:
-        postDetails += p.getText() + " "
+        postDetails += p.getText().replace("\n", "") + " "
 
     f.write(article_title.replace(",", "") + "," +
             postDetails.replace(",", "") + "\n")
